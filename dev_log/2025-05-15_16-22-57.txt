@@ -1,0 +1,30 @@
+=== AuthCheckView 보안 강화 ===
+
+날짜: 2025-05-15 16:22:57
+
+문제:
+- AuthCheckView에서 session_id나 user가 없을 때도 200 OK를 반환
+- 보안상 문제가 될 수 있는 상황
+
+해결 방법:
+1. session_id와 user 검증 로직 추가
+   ```python
+   if not session_id and not user:
+       return Response(
+           {'error': 'Session ID or user authentication is required'},
+           status=status.HTTP_401_UNAUTHORIZED
+       )
+   ```
+2. 401 Unauthorized 응답 코드 사용
+   - 인증이 필요한 리소스에 접근 시 사용
+   - 클라이언트에게 인증이 필요한 것을 명확히 알림
+
+결과:
+- session_id나 user가 없을 때 401 Unauthorized 응답 반환
+- 보안이 강화됨
+- 클라이언트에게 명확한 에러 메시지 제공
+
+학습 포인트:
+- HTTP 응답 코드의 적절한 사용
+- 인증이 필요한 API 엔드포인트의 보안 처리
+- 클라이언트에게 명확한 에러 메시지 제공의 중요성

@@ -1,0 +1,14 @@
+=== URL 설정 구조화 ===
+
+날짜: 2025-05-15 15:22:06
+
+작업 내용:
+1. accounts 앱의 URL 설정을 앱 내부의 urls.py에 유지
+2. 프로젝트의 urls.py에 accounts 앱의 URL을 include
+   - 'api/' 경로에 accounts 앱의 URL들을 포함
+   - 전체 URL 구조를 명확하게 유지
+
+결과:
+- 각 앱의 URL 설정이 해당 앱의 urls.py에 모여있어 관리가 용이해짐
+- 프로젝트의 urls.py가 더 깔끔해짐
+- API 경로가 'api/'로 통일되어 RESTful API 구조가 명확해짐

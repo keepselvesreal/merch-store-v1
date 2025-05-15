@@ -1,0 +1,24 @@
+=== API 구조 재구성 ===
+
+날짜: 2025-05-15 15:24:37
+
+작업 내용:
+1. 프로젝트의 URL 구조 재구성
+   - 각 앱별로 명확한 URL 네임스페이스 지정
+   - accounts 앱의 URL을 'api/auth/'로 이동
+   - products, cart, orders, reviews, qna 앱의 URL 추가
+
+2. accounts 앱의 URL 구조 개선
+   - 비회원 관련 URL 구조 개선
+   - 기존 /api/auth/ 하위의 URL들을 /api/auth/ 레벨로 이동
+   - 토큰 갱신, 사용자 정보 조회 URL 추가
+
+3. 비회원 관련 URL 구조 변경
+   - 기존: POST /api/guest/session/
+   - 변경: POST /api/auth/guest/session/
+   - 비회원 관련 URL도 auth 네임스페이스 하위로 통합
+
+결과:
+- 더 체계적이고 일관된 API 구조 구현
+- 각 앱의 URL이 명확하게 분리되어 관리가 용이해짐
+- 비회원 관련 URL도 인증 관련 URL들과 함께 통합되어 관리가 용이해짐

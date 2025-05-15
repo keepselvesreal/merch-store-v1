@@ -1,0 +1,25 @@
+=== Django Sessions 중복 오류 해결 ===
+
+날짜: 2025-05-15 16:37:33
+
+발생한 오류:
+```
+ImproperlyConfigured: Application labels aren't unique, duplicates: sessions
+```
+
+원인:
+1. Django의 기본 INSTALLED_APPS에 이미 `django.contrib.sessions`이 포함되어 있음
+2. settings.py에서 중복으로 `django.contrib.sessions`을 추가함
+
+해결 방법:
+1. settings.py의 INSTALLED_APPS에서 중복된 `django.contrib.sessions`을 제거
+2. Django의 기본 세션 설정을 그대로 사용
+
+결과:
+- makemigrations 명령어가 정상적으로 실행됨
+- 세션 기능이 정상적으로 작동
+
+학습 포인트:
+- Django의 기본 INSTALLED_APPS에 이미 포함된 앱은 별도로 추가할 필요 없음
+- 중복된 앱 등록은 ImproperlyConfigured 오류를 발생시킴
+- Django의 기본 세션 설정을 확인하고 필요에 따라 수정하는 것이 좋음

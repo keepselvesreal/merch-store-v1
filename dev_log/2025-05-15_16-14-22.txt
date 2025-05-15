@@ -1,0 +1,28 @@
+=== AuthCheckView session_id null 문제 원인 및 해결 ===
+
+날짜: 2025-05-15 16:14:22
+
+문제:
+- /api/auth/check/ 엔드포인트 호출 시 header에 session_id를 담아 보내도 null 반환
+
+원인:
+- 클라이언트에서 'X-X-Session-ID' 헤더를 사용하였으며, DRF에서는 'X-Session-ID' 헤더를 HTTP_X_SESSION_ID 키로 매핑
+- 코드에서 request.headers.get('X-Session-ID')만 확인하도록 되어 있어 'X-X-Session-ID'를 읽지 못함
+
+해결 방법:
+1. 클라이언트에서 요청 헤더 이름을 'X-Session-ID'로 변경
+   ```http
+   X-Session-ID: 6c9c7444-ed88-4d2c-8d86-1fce51956c86
+   ```
+2. 코드에서 대체 헤더도 수용하려면 다음과 같이 수정
+   ```python
+   session_id = (
+       request.session.get('session_id') or
+       request.headers.get('X-Session-ID') or
+       request.headers.get('X-X-Session-ID')
+   )
+   ```
+
+결과:
+- 올바른 헤더 이름 사용 시 session_id가 정상적으로 반환됨
+- 필요 시 코드에서 추가 헤더 처리로 유연성 확보

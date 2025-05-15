@@ -1,0 +1,2 @@
+오류 원인: cart/models.py에서 잘못된 임포트 경로로 인해 ModuleNotFoundError 발생
+해결 방법: 임포트 경로를 products.models로 수정

@@ -1,0 +1,33 @@
+=== GuestSessionView 문제 해결 최종 정리 ===
+
+날짜: 2025-05-15 16:04:23
+
+문제 발생 과정:
+1. GuestSessionView에서 빈 딕셔너리가 반환됨
+2. Serializer의 초기화 방식이 잘못되어 to_representation이 제대로 작동하지 않음
+
+원인 분석:
+1. DRF Serializer의 초기화 방식:
+   - `Serializer(data=...)`: 검증을 위한 초기화
+   - `Serializer(instance=...)`: 응답을 위한 초기화
+2. `to_representation` 메서드는 instance를 통해 호출되며, data를 통해는 호출되지 않음
+
+해결 방법:
+1. GuestSessionView에서 Serializer 초기화 방식 변경:
+   ```python
+   # 변경 전
+   serializer = GuestSessionSerializer(data={'session_id': session_id})
+   
+   # 변경 후
+   serializer = GuestSessionSerializer(instance={'session_id': session_id})
+   ```
+2. `instance` 키워드 인자를 사용하여 to_representation이 정상 작동하도록 함
+
+결과:
+- /api/auth/guest/session/에서 session_id가 포함된 올바른 응답이 반환됨
+- DRF Serializer의 초기화 방식에 대한 이해를 확보
+
+학습 포인트:
+- DRF에서 응답 데이터를 생성할 때는 `Serializer(instance=...)`를 사용해야 함
+- `to_representation` 메서드는 instance를 통해만 호출됨
+- Serializer의 초기화 방식에 따른 메서드 호출 경로가 다름

@@ -1,0 +1,12 @@
+=== GuestSessionView Serializer 초기화 방식 변경 ===
+
+날짜: 2025-05-15 16:02:59
+
+문제:
+- Serializer(data=…) 대신 Serializer(instance=…)를 사용해야 to_representation이 정상 작동
+
+해결 방법:
+- GuestSessionView에서 GuestSessionSerializer(instance={…})로 초기화하도록 수정
+
+결과:
+- /api/auth/guest/session/에서 session_id가 포함된 응답이 정상적으로 반환됨

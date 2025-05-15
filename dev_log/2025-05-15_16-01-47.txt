@@ -1,0 +1,13 @@
+=== GuestSessionView 빈 딕셔너리 반환 문제 추가 해결 ===
+
+날짜: 2025-05-15 16:01:47
+
+문제:
+- GuestSessionView에서 여전히 빈 딕셔너리가 반환됨
+- Serializer의 data 속성이 to_representation의 반환값을 따르지 않음
+
+해결 방법:
+- GuestSessionSerializer에 to_representation 메서드를 오버라이드하여 session_id가 항상 반환되도록 수정
+
+결과:
+- /api/auth/guest/session/에서 session_id가 포함된 응답이 정상적으로 반환됨

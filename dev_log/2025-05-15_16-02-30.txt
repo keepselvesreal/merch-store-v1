@@ -1,0 +1,14 @@
+=== GuestSessionView 추가 수정 ===
+
+날짜: 2025-05-15 16:02:30
+
+발생한 문제:
+1. /api/auth/guest/session/ 엔드포인트에서 여전히 빈 딕셔너리 반환
+   - serializer.data 대신 serializer.validated_data를 사용해야 함
+
+해결 방법:
+1. GuestSessionView 수정
+   - return Response(serializer.data) → return Response(serializer.validated_data)로 변경
+
+결과:
+- 이제 정상적으로 session_id가 포함된 응답이 반환될 것임

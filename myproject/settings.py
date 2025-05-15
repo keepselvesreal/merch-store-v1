@@ -11,14 +11,15 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-import sys
+from datetime import timedelta # Moved import to top
+# import sys # Unused import removed
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(BASE_DIR / 'apps'))
+# sys.path.insert(0, str(BASE_DIR / 'apps')) # Removed sys.path modification
 
 # 커스텀 User 모델 설정
-AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = 'accounts.User' # Corrected: app_label is 'accounts'
 
 # related_name 충돌 해결을 위한 설정
 AUTHENTICATION_BACKENDS = [
@@ -35,7 +36,7 @@ SECRET_KEY = 'django-insecure-*#sk^0hm2d2+($@$_@0%^7s3%=k%+*a#-mm28bbn$+one0pbag
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS: list[str] = [] # Added type hint
 
 
 # Application definition
@@ -149,7 +150,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-from datetime import timedelta
+# from datetime import timedelta # Moved to top
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
@@ -159,7 +160,12 @@ SIMPLE_JWT = {
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # DB 기반 세션
 SESSION_COOKIE_AGE = 604800  # 7일
 SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SECURE = False  # ⚠️ 로컬 개발에서는 HTTPS가 아니므로 False로 설정
+SESSION_COOKIE_SECURE = False  # 로컬 개발에서는 HTTPS가 아니므로 False로 설정
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = 'media'
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}

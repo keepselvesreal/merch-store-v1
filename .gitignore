@@ -44,9 +44,6 @@ ENV/
 media/
 static/
 
-# Development Logs
-dev_log/
-
 # Mypy Cache
 .mypy_cache/
 

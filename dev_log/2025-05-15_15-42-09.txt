@@ -1,0 +1,27 @@
+=== 커스텀 User 모델 관련 문제 해결 ===
+
+날짜: 2025-05-15 15:42:09
+
+발생한 문제:
+1. 커스텀 User 모델 정의 시 reverse accessor 충돌 발생
+   - accounts.User와 auth.User 간에 groups와 user_permissions 필드의 related_name 충돌
+   - 이로 인해 Django system check에서 오류 발생
+
+해결 방법:
+1. settings.py 수정
+   - AUTH_USER_MODEL = 'accounts.User' 추가
+   - AUTHENTICATION_BACKENDS 설정 추가
+
+2. accounts/models.py 수정
+   - groups와 user_permissions 필드에 related_name='accounts_user_set' 설정 추가
+   - 각 필드에 적절한 verbose_name과 help_text 추가
+
+3. 데이터베이스 마이그레이션
+   - 기존 마이그레이션 파일 삭제
+   - makemigrations 실행
+   - migrate 실행
+
+결과:
+- Reverse accessor 충돌 오류 해결
+- 커스텀 User 모델이 정상적으로 작동
+- 데이터베이스 마이그레이션이 성공적으로 완료됨

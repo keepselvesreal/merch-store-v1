@@ -1,0 +1,40 @@
+=== AuthCheckView 문제 해결 ===
+
+날짜: 2025-05-15 16:18:23
+
+문제:
+- AuthCheckView에서 session_id가 null로 반환됨
+- 클라이언트에서 X-Session-ID 헤더를 통해 session_id를 보내도 서버에서 제대로 처리하지 않음
+
+원인:
+1. Serializer 초기화 방식의 오류:
+   - 기존: `AuthCheckSerializer(data=data)` → deserialization 모드
+   - 문제: `data`로 초기화하면 `to_representation`가 호출되지 않음
+   - `is_valid()` 호출 필요
+
+2. DRF Serializer의 두 가지 모드:
+   - `Serializer(data=...)`: deserialization (입력 데이터 검증)
+   - `Serializer(instance=...)`: serialization (응답 데이터 생성)
+
+해결 방법:
+1. AuthCheckView에서 Serializer 초기화 방식 변경:
+   ```python
+   # 변경 전
+   serializer = AuthCheckSerializer(data=data)
+   serializer.is_valid(raise_exception=True)
+   
+   # 변경 후
+   serializer = AuthCheckSerializer(instance=data)
+   ```
+2. `instance` 키워드 인자를 사용하여 to_representation이 정상 작동하도록 함
+3. `is_valid()` 호출 제거 (serialization 모드에서는 필요 없음)
+
+결과:
+- /api/auth/check/에서 session_id가 정상적으로 반환됨
+- DRF Serializer의 serialization/serialization 모드에 대한 이해를 확보
+
+학습 포인트:
+- DRF에서 응답 데이터 생성 시 `Serializer(instance=...)`를 사용해야 함
+- `to_representation`는 instance를 통해만 호출됨
+- Serializer의 초기화 방식에 따른 메서드 호출 경로가 다름
+- deserialization과 serialization의 차이 이해

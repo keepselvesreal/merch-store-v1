@@ -1,0 +1,2 @@
+오류 원인: INSTALLED_APPS에서 앱 이름이 잘못 지정되어 Product 모델 충돌 발생
+해결 방법: INSTALLED_APPS에서 앱 이름을 apps.products로 수정

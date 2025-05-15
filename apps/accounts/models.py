@@ -7,21 +7,26 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)  # 생성 시간
     updated_at = models.DateTimeField(auto_now=True)  # 수정 시간
 
-    # related_name 충돌 해결을 위한 설정
-    groups = models.ManyToManyField(
-        'auth.Group',
-        related_name='accounts_user_set',
-        blank=True,
-        verbose_name='groups',
-        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
-    )
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        related_name='accounts_user_set',
-        blank=True,
-        verbose_name='user permissions',
-        help_text='Specific permissions for this user.',
-    )
+    # related_name을 Django AbstractUser 기본값으로 사용하도록 수정
+    # groups = models.ManyToManyField(
+    #     'auth.Group',
+    #     # related_name='user_set', # Django default
+    #     # related_query_name='user',
+    #     blank=True,
+    #     verbose_name='groups',
+    #     help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
+    # )
+    # user_permissions = models.ManyToManyField(
+    #     'auth.Permission',
+    #     # related_name='user_set', # Django default
+    #     # related_query_name='user',
+    #     blank=True,
+    #     verbose_name='user permissions',
+    #     help_text='Specific permissions for this user.',
+    # )
 
     def __str__(self):
         return self.username
+
+    class Meta:
+        app_label = 'accounts'

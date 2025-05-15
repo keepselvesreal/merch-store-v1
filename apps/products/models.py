@@ -12,6 +12,9 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        app_label = 'products'
+
 class ProductOption(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='options')  # 상품 참조
     color = models.CharField(max_length=50)  # 색상
@@ -21,3 +24,6 @@ class ProductOption(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - {self.color}/{self.size}"
+
+    class Meta:
+        app_label = 'products'

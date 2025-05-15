@@ -6,9 +6,10 @@ from django.contrib.sessions.models import Session
 from django.utils import timezone
 from .models import Cart, CartItem
 from .serializers import CartSerializer, CartItemSerializer
+from .permissions import IsCartOwner
 
 class CartView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsCartOwner]
 
     def get(self, request):
         # 회원: JWT로 사용자 확인
@@ -34,7 +35,7 @@ class CartView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class CartItemView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsCartOwner]
 
     def post(self, request):
         user = request.user if request.user.is_authenticated else None
@@ -80,7 +81,7 @@ class CartItemView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CartItemDetailView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsCartOwner]
 
     def patch(self, request, item_id):
         user = request.user if request.user.is_authenticated else None

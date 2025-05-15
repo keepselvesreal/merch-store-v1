@@ -49,8 +49,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
-    'apps.accounts',
     'apps.products',
+    'apps.accounts',
     'apps.cart',
     'apps.orders',
     'apps.reviews',
@@ -160,3 +160,6 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # DB 기반 세션
 SESSION_COOKIE_AGE = 604800  # 7일
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SECURE = False  # ⚠️ 로컬 개발에서는 HTTPS가 아니므로 False로 설정
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = 'media'

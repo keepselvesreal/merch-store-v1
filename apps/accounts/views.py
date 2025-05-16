@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .serializers import (
     UserSerializer,
     CustomTokenObtainPairSerializer,
@@ -37,6 +37,11 @@ class GuestSessionView(APIView):
         # 응답으로 세션 키 전달
         serializer = GuestSessionSerializer(instance={'session_id': session_key})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class CustomTokenRefreshView(TokenRefreshView):
+    # 일반적으로 별도의 커스터마이징이 필요 없지만,
+    # 필요하다면 여기서 serializer_class 등을 오버라이드할 수 있습니다.
+    pass
 
 class AuthCheckView(APIView):
     permission_classes = [AllowAny]

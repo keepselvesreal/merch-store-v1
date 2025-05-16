@@ -1,15 +1,18 @@
 from rest_framework.views import APIView
-import logging
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Order
-from .serializers import OrderSerializer
+from .models import Order, Payment
+from .serializers import OrderSerializer, PaymentSerializer
 from .permissions import IsOrderOwner
+from apps.products.models import ProductOption
 from django.db import transaction
 from django.utils import timezone
+import logging
+import uuid
+
+logger = logging.getLogger(__name__)
 
 class OrderCreateView(APIView):
-    # permission_classes = [IsOrderOwner]
     permission_classes = []
 
     def post(self, request):
@@ -49,7 +52,6 @@ class OrderCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class OrderListView(APIView):
-    # permission_classes = [IsOrderOwner]
     permission_classes = []
 
     def get(self, request):
@@ -67,21 +69,17 @@ class OrderListView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class OrderDetailView(APIView):
-    permission_classes = [] # 현재는 모든 접근 허용 (추후 필요시 IsOrderOwner 등 권한 클래스 추가)
+    permission_classes = []
 
     def get(self, request, order_number):
         try:
             if request.user.is_authenticated:
-                # 인증된 사용자: order_number와 user가 일치하는 주문 조회
                 order = Order.objects.get(order_number=order_number, user=request.user)
             else:
-                # 비인증 사용자: order_number와 order_token이 일치하는 주문 조회
                 order_token = request.headers.get('X-Order-Token') or request.query_params.get('order_token')
                 if not order_token:
-                    # 비인증 사용자는 order_token이 필수
                     return Response({"error": "Order token is required for guest users."},
-                                    status=status.HTTP_401_UNAUTHORIZED) # 또는 403 Forbidden
-
+                                    status=status.HTTP_401_UNAUTHORIZED)
                 order = Order.objects.get(order_number=order_number, order_token=order_token)
 
             serializer = OrderSerializer(order)
@@ -89,6 +87,78 @@ class OrderDetailView(APIView):
         except Order.DoesNotExist:
             return Response({"error": "Order not found or access denied"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            # 프로덕션 환경에서는 구체적인 오류 메시지 대신 일반적인 메시지를 반환하는 것이 좋습니다.
-            logging.error(f"Unexpected error in OrderDetailView for order_number {order_number}: {str(e)}")
+            logger.error(f"Unexpected error in OrderDetailView for order_number {order_number}: {str(e)}")
             return Response({"error": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class OrderPayView(APIView):
+    permission_classes = [IsOrderOwner]
+
+    def post(self, request, order_number):
+        user = request.user if request.user.is_authenticated else None
+        session_id = request.headers.get('X-Session-ID')
+        order_token = request.headers.get('X-Order-Token')
+
+        try:
+            # 소유자 검증
+            order = Order.objects.get(
+                order_number=order_number,
+                user=user if user else None,
+                session_id=session_id if not user else None,
+                order_token=order_token if not user else None
+            )
+        except Order.DoesNotExist:
+            return Response({"error": "Order not found or access denied"}, status=status.HTTP_404_NOT_FOUND)
+
+        if order.payment_status != 'pending':
+            return Response({"error": f"Order payment status is {order.payment_status}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 결제 데이터 검증
+        serializer = PaymentSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            with transaction.atomic():
+                # 외부 결제 서비스 호출 (예: 가정된 호출)
+                payment_method_id = request.data.get('payment_method_id')
+                # 실제 결제 서비스 SDK로 대체 (예: KakaoPay, TossPayments)
+                # payment_response = external_payment_service.process_payment(
+                #     amount=order.total_price,
+                #     payment_method_id=payment_method_id,
+                #     order_id=order.order_number
+                # )
+
+                # 시뮬레이션: 결제 성공 가정
+                payment_id = f"pay_{uuid.uuid4()}"  # 결제 서비스에서 제공하는 ID
+                payment_status = 'completed'  # 결제 서비스 응답 기반
+
+                # 결제 정보 저장
+                payment, created = Payment.objects.get_or_create(
+                    order=order,
+                    defaults={
+                        'payment_id': payment_id,
+                        'amount': order.total_price,
+                        'status': payment_status
+                    }
+                )
+
+                if payment_status == 'completed':
+                    order.payment_status = 'completed'
+                    order.status = 'completed'
+                    order.save()
+                    logger.info(f"Payment succeeded for order {order.order_number}, payment_id: {payment_id}")
+                    return Response({
+                        'payment': PaymentSerializer(payment).data,
+                        'order': OrderSerializer(order).data
+                    }, status=status.HTTP_200_OK)
+                else:
+                    payment.status = 'failed'
+                    payment.save()
+                    order.payment_status = 'failed'
+                    order.save()
+                    logger.warning(f"Payment failed for order {order.order_number}, payment_id: {payment_id}")
+                    return Response({"error": "Payment failed"}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            logger.error(f"Payment error for order {order.order_number}: {str(e)}")
+            return Response({"error": f"Payment error: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
